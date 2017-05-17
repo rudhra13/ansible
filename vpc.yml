@@ -1,0 +1,31 @@
+---
+
+- name: create vpc
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    vpc_name: "vpc_testing"
+    vpc_cidr_block: "10.0.0.0/16"
+    aws_region: "us-east-1"
+    aws_access_key: "access key"
+    aws_secret_key: "secret key"
+    private_subnet_1_cidr: "10.0.0.0/24"
+    public_subnet_1_cidr: "10.0.0.0/24"
+
+# Creating the VPC.
+# We register it in the variable my_vpc.
+  tasks:
+  - name:               Create VPC
+    ec2_vpc_net:
+      name:             "{{ vpc_name }}"
+      cidr_block:       "{{ vpc_cidr_block }}"
+      region:           "{{ aws_region }}"
+      aws_access_key:   "{{ aws_access_key }}"
+      aws_secret_key:   "{{ aws_secret_key }}"
+      state:            "present"
+    register: my_vpc
+
+  - name:               Set VPC ID in variable
+    set_fact:
+      vpc_id:           "{{ my_vpc.vpc.id }}"
