@@ -1,0 +1,68 @@
+---
+- name: create security group testing
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    rg: us-east-1
+    project_name: "test"
+    vpc_id: "vpc-bab542c3"
+    vpc_region: "us-east-1"
+    SECRET: "secret key"
+    ACCESS: "access key"
+    # owner: "rudhra"
+      
+  tasks:
+  - name: security group
+    ec2_group:
+      name: "{{ project_name }}"
+      description: security group testing
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ vpc_region }}"
+      aws_secret_key: "{{SECRET}}"
+      aws_access_key: "{{ ACCESS }}"
+      # ec2_tags:
+      #   Name: "{{ project_name }} security group"
+      #   Project: "{{ project_name }}"
+      #   Owner: "{{ owner }}"
+      rules:
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 443
+          to_port: 443
+          cidr_ip: 0.0.0.0/0
+        # - proto: tcp
+        #   ports:
+        #     - 80
+        #     - 443
+        #     - 22
+        #   cidr_ip: 0.0.0.0/0 
+               
+        # - proto: tcp
+        #   from_port: 3306
+        #   to_port: 3306
+        #   group_id: give security group id
+      rules_egress:
+        - proto: all
+          cidr_ip: 0.0.0.0/0
+          # group_name: outbound_security_group
+          # # description to use if example-other needs to be created
+          # group_desc: outbound rules for security group
+  #   register: aws_sg
+
+  # - name: naming security group
+  #   ec2_tag:
+  #     resource: "{{aws_sg.group_id}}"
+  #     region: "{{rg}}"
+  #     state: present
+  #     tags:
+  #       Name: "test security group"
+  #       Project: "testing"
+  #       Owner: "rudhra_test"
