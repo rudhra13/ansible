@@ -15,6 +15,7 @@
 
 # Creating the VPC.
 # We register it in the variable my_vpc.
+
   tasks:
   - name:               Create VPC
     ec2_vpc_net:
