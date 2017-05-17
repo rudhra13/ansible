@@ -1,0 +1,46 @@
+---
+
+- name: create vpc
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    elastic_ip: "elastic ip"
+    aws_region: "us-east-1"
+    aws_access_key: "access key"
+    aws_secret_key: "secret key"
+    public_subnet_id: "public subnet id"
+
+
+  - name: Setup AWS CLI (1/3)
+    shell: >
+      aws configure set aws_access_key_id "{{ aws_access_key }}"
+
+  - name: Setup AWS CLI (2/3)
+    shell: >
+      aws configure set aws_secret_access_key "{{ aws_secret_key }}"
+
+  - name: Setup AWS CLI (3/3)
+    shell: >
+      aws configure set region {{ aws_region }}
+
+  # NAT Gateway.
+  # we attach a NAT Gateway to a public subnet.
+  # This is where the service will be located.
+
+  - name: Create NAT Gateway
+    shell: >
+      aws ec2 create-nat-gateway \
+      --subnet-id {{ public_subnet_id }} \
+      --allocation-id {{ elastic_ip }} \
+      --query NatGateway.NatGatewayId | tr -d '"'
+    register: my_nat_gateway
+
+  - name: Set Nat Gateway ID in variable
+    set_fact:
+      nat_gateway_id: "{{ my_nat_gateway.stdout }}"
+
+
+  # We pause a few seconds for the NAT Gateway to be ready.
+
+  - pause: seconds=5

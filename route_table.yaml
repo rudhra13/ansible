@@ -1,0 +1,56 @@
+---
+
+- name: create public and private route table
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    vpc_id: "vpc id"
+    aws_region: "us-east-1"
+    aws_access_key: "access key"
+    aws_secret_key: "secret key"
+    public_subnet_id: "public subnet id"
+    private_subnet_id: "private subnet id"
+    igw_id: "igw id"
+    nat_gateway_id: "nat gateway id "
+
+  # Route Tables.
+  # one RT for the public subnet,
+  # and one for the private subnet.
+  # the Route Table for the private subnet
+  # will redirect default destinations to the NAT Gateway
+  # and the Route Table for the public subnet will use the
+  # Internet Gateway.
+  # 
+  # the Route Tables will contain 
+  # a route for resources inside the VPC, so that if we need 
+  # to reach an internal resource, we don't go to the Internet
+  # Gateway or the NAT Gateway.
+
+  - name: Set up public subnet route table
+    ec2_vpc_route_table:
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ aws_region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      tags:
+        Name: "Public"
+      subnets:
+        - "{{ public_subnet_id }}"
+      routes:
+        - dest: "0.0.0.0/0"
+          gateway_id: "{{ igw_id }}"
+
+  - name: Set up private subnet route table
+    ec2_vpc_route_table:
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ aws_region }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      tags:
+        Name: "Private"
+      subnets:
+        - "{{ private_subnet_id }}"
+      routes:
+        - dest: "0.0.0.0/0"
+          gateway_id: "{{ nat_gateway_id }}"

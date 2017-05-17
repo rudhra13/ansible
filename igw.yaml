@@ -1,0 +1,27 @@
+---
+
+- name: create internet gateway
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    vpc_id: "vpc id"
+    aws_region: "us-east-1"
+    aws_access_key: "access key"
+    aws_secret_key: "secret key"
+
+  # create Internet Gateway.
+  # This component allows traffic between the VPC and the outside world.
+
+  - name:               Create Internet Gateway for VPC
+    ec2_vpc_igw:
+      vpc_id:           "{{ vpc_id }}"
+      region:           "{{ aws_region }}"
+      aws_access_key:   "{{ aws_access_key }}"
+      aws_secret_key:   "{{ aws_secret_key }}"
+      state:            "present"
+    register: my_vpc_igw
+
+  - name:               Set Internet Gateway ID in variable
+    set_fact:
+      igw_id:           "{{ my_vpc_igw.gateway_id }
